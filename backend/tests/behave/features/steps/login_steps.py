@@ -1,8 +1,13 @@
 from behave import given, when, then
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
+
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
+import os
 
 @given("I am on the post creation page")
 def step_go_to_post_creation(context):
@@ -24,10 +29,20 @@ def step_enter_hashtags(context, hashtags):
     hashtags_input = context.driver.find_element(By.ID, "hashtags")  # Verwendet die ID "hashtags"
     hashtags_input.send_keys(hashtags)
 
-@when('I upload a file "{file_path}"')
-def step_upload_file(context, file_path):
-    file_input = context.driver.find_element(By.ID, "media")  # Verwendet die ID "media"
-    file_input.send_keys(file_path)
+@when('I upload a file "{file_name}"')
+def step_upload_file(context, file_name):
+    # Verzeichnis korrekt zusammensetzen
+    test_file_path = os.path.abspath(
+        os.path.join("test_files", "test_image.jpg")
+    )
+    print(f"Attempting to upload file at path: {test_file_path}")
+
+    # Datei ins <input>-Element laden
+    file_input = context.driver.find_element(By.ID, "media")
+    file_input.send_keys(test_file_path)
+
+
+
 
 @when("I click the upload button")
 def step_click_upload_button(context):
@@ -36,6 +51,8 @@ def step_click_upload_button(context):
 
 @then("I should see a success message")
 def step_verify_success_message(context):
-    success_message = context.driver.find_element(By.XPATH, "//p")  # Prüft eine Nachricht
+    wait = WebDriverWait(context.driver, 10)  # Warte bis zu 10 Sekunden
+    success_message = wait.until(
+        EC.visibility_of_element_located((By.XPATH, "//p"))
+    )
     assert "Post uploaded successfully" in success_message.text
-    context.driver.quit()  # Schließt den Browser nach dem Test
