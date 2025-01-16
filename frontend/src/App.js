@@ -62,6 +62,11 @@ function App() {
     formData.append("media", media);
     formData.append("scheduled_time", scheduledTime);
 
+    if (scheduledTime) {
+      formData.append("scheduled_time", scheduledTime);
+    }
+    
+
     try {
       const response = await axios.post(
         "http://127.0.0.1:5000/upload",
@@ -82,7 +87,7 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <h1>Instagram Post - FARM2</h1>
+        <h1>Instagram Post</h1>
         <Routes>
           <Route path="/" element={
             <div>
@@ -140,7 +145,7 @@ function App() {
 
             {message && <p>{message}</p>}
             
-            <Link to="scheduled_posts" className="button"> View Scheduled Posts</Link>
+            <Link to="scheduled_posts" className="view-scheduled-posts"> View Scheduled Posts</Link>
             
             </div>
           } 

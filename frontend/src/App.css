@@ -49,3 +49,24 @@ p {
   margin-top: 20px;
   font-weight: bold;
 }
+
+/* Styles for the "View Scheduled Posts" link/button */
+.view-scheduled-posts {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #007bff; /* Match the button color */
+  color: white;
+  text-decoration: none; /* Remove underline for link */
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.view-scheduled-posts:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+  color: white;
+}
