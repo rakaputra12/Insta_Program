@@ -68,14 +68,14 @@ select:focus {
 }
 
 button {
-  display: inline-block;
+  display: block;
   padding: 10px 20px;
   background-color: #007bff;
   color: #fff;
   text-decoration: none;
   border: none;
   border-radius: 5px;
-  margin-top: 20px;
+  margin: 20px auto; /* Zentriert jeden Button horizontal */
   font-size: 16px;
 }
 
@@ -134,4 +134,30 @@ button:disabled {
   text-align: center;
   background-color: #ffffff;
   color: #666;
+}
+.view-scheduled-posts {
+  display: block; /* Unabhängige Zentrierung */
+  margin: 20px auto; /* Zentriert horizontal */
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: fit-content; /* Passt die Breite an den Inhalt an */
+  min-width: 150px; /* Optional: Mindestbreite festlegen */
+}
+
+.view-scheduled-posts:hover {
+  background-color: #0056b3;
+  color: white;
+}
+.message {
+  text-align: center;
+  font-size: 16px;
+  color: #333;
 }

@@ -96,7 +96,7 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <h1>Instagram Post - Enhanced</h1>
+        <h1>Instagram Post</h1>
         <Routes>
           <Route
             path="/"
@@ -141,6 +141,18 @@ function App() {
                       onChange={(e) => setScheduledTime(e.target.value)}
                     />
                   </div>
+                  <div>
+                    <label htmlFor="media">Media File:</label>
+                    <input
+                      type="file"
+                      id="media"
+                      ref={mediaInputRef}
+                      onChange={handleFileChange}
+                    />
+                    {fileError && <p style={{ color: "red" }}>{fileError}</p>}
+                  </div>
+
+                  {/* Drag-and-Drop Box */}
                   <div
                     onDrop={handleDrop}
                     onDragOver={handleDragOver}
@@ -163,22 +175,13 @@ function App() {
                       </div>
                     )}
                   </div>
-                  <div>
-                    <label htmlFor="media">Media File:</label>
-                    <input
-                      type="file"
-                      id="media"
-                      ref={mediaInputRef}
-                      onChange={handleFileChange}
-                    />
-                    {fileError && <p style={{ color: "red" }}>{fileError}</p>}
-                  </div>
+
                   <button type="submit" disabled={!!fileError}>
                     Upload Post
                   </button>
                 </form>
-                {message && <p>{message}</p>}
-                <Link to="scheduled_posts" className="button">
+                {message && <p style={{ textAlign: "center" }}>{message}</p>}
+                <Link to="scheduled_posts" className="view-scheduled-posts">
                   View Scheduled Posts
                 </Link>
               </div>
