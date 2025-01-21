@@ -18,7 +18,7 @@ CORS(app)
 # PostgreSQL database connection
 DB_HOST = "localhost"        
 DB_PORT = 5432            
-DB_NAME = "postgres" #ändern auf insta_db   
+DB_NAME = "postgres" 
 DB_USER = "postgres"    
 DB_PASSWORD = "insta_db"
 
