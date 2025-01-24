@@ -176,7 +176,7 @@ function App() {
                     )}
                   </div>
 
-                  <button type="submit" disabled={!!fileError}>
+                  <button type="submit" disabled={!!fileError} data-test-id="upload-post-button">
                     Upload Post
                   </button>
                 </form>

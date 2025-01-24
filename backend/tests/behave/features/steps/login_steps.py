@@ -44,9 +44,11 @@ def step_upload_file(context, file_name):
 
 
 
+from selenium.webdriver.common.by import By
+
 @when("I click the upload button")
 def step_click_upload_button(context):
-    upload_button = context.driver.find_element(By.ID, "uploadButton")  # Verwendet die ID "uploadButton"
+    upload_button = context.driver.find_element(By.CSS_SELECTOR, "[data-test-id='upload-post-button']")
     upload_button.click()
 
 @then("I should see a success message")
