@@ -59,3 +59,4 @@ def step_verify_success_message(context):
     )
     assert "Post uploaded successfully" in success_message.text
 
+
