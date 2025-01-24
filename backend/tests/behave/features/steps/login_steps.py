@@ -55,6 +55,7 @@ def step_click_upload_button(context):
 def step_verify_success_message(context):
     wait = WebDriverWait(context.driver, 10)  # Warte bis zu 10 Sekunden
     success_message = wait.until(
-        EC.visibility_of_element_located((By.XPATH, "//p"))
+        EC.visibility_of_element_located((By.CSS_SELECTOR, "[data-test-id='success-message']"))
     )
     assert "Post uploaded successfully" in success_message.text
+

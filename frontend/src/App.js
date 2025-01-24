@@ -180,7 +180,7 @@ function App() {
                     Upload Post
                   </button>
                 </form>
-                {message && <p style={{ textAlign: "center" }}>{message}</p>}
+                {message && <p className="message" data-test-id="success-message">{message}</p>}
                 <Link to="scheduled_posts" className="view-scheduled-posts">
                   View Scheduled Posts
                 </Link>
