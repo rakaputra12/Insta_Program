@@ -6,6 +6,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import datetime
 import psycopg2
 from psycopg2.extras import RealDictCursor
+import uuid
 
 
 app = Flask(__name__)
@@ -17,7 +18,7 @@ CORS(app)
 # PostgreSQL database connection
 DB_HOST = "localhost"        
 DB_PORT = 5432            
-DB_NAME = "postgres"    
+DB_NAME = "postgres" 
 DB_USER = "postgres"    
 DB_PASSWORD = "insta_db"
 
@@ -66,16 +67,19 @@ def upload_post():
         if not file:
             return jsonify({"status": "error", "message": "No media file provided"}), 400
 
-        media_path = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
+        # Generate a unique filename
+        unique_filename = f"{uuid.uuid4()}_{file.filename}"
+        media_path = os.path.join(app.config["UPLOAD_FOLDER"], unique_filename)
+        print(f"Saving file to: {media_path}")
         file.save(media_path)
 
         if scheduled_time:  # Schedule the post
             # Save to the database
             with db_connection.cursor() as cursor:
                 cursor.execute(
-                    "INSERT INTO scheduled_posts (post_type, caption, hashtags, media_path, scheduled_time) "
-                    "VALUES (%s, %s, %s, %s, %s)",
-                    (post_type, caption, hashtags, media_path, scheduled_time)
+                "INSERT INTO scheduled_posts (post_type, caption, hashtags, media_path, scheduled_time) "
+                "VALUES (%s, %s, %s, %s, %s)",
+                (post_type, caption, hashtags, media_path, scheduled_time)  # Save only the unique filename
                 )
                 db_connection.commit()
             return jsonify({"status": "success", "message": "Post scheduled successfully!"})
@@ -140,7 +144,7 @@ def upload_scheduled_posts():
 
 scheduler = BackgroundScheduler()
 if not scheduler.get_jobs():
-    scheduler.add_job(upload_scheduled_posts, "interval", minutes=1) #minutes=1 #To prevent overlapping set interval 2 minutes
+    scheduler.add_job(upload_scheduled_posts, "interval", minutes=2) #minutes=1 #To prevent overlapping set interval 2 minutes
 scheduler.start()
 
 
@@ -148,7 +152,14 @@ scheduler.start()
 def get_scheduled_posts():
     try:
         with db_connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM scheduled_posts WHERE status = 'pending'")
+            # Convert scheduled_time to ISO 8601 format
+            cursor.execute(
+                """
+                SELECT id, post_type, caption, hashtags, media_path, 
+                to_char(scheduled_time, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') as scheduled_time, status
+                FROM scheduled_posts WHERE status = 'pending'
+                """
+            )
             posts = cursor.fetchall()
         return jsonify(posts)  # Return posts as a JSON response
     except Exception as e:
@@ -164,7 +175,7 @@ def delete_scheduled_post(post_id):
             post = cursor.fetchone()
 
         if post:
-            media_path = post["media_path"]
+            media_path = os.path.join(app.config["UPLOAD_FOLDER"], post["media_path"])
             # Delete the post from the database
             with db_connection.cursor() as cursor:
                 cursor.execute("DELETE FROM scheduled_posts WHERE id = %s", (post_id,))
@@ -187,4 +198,4 @@ def delete_scheduled_post(post_id):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5000) #host="0.0.0.0"
