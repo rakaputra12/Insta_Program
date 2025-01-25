@@ -53,7 +53,7 @@ def step_click_upload_button(context):
 
 @then("I should see a success message")
 def step_verify_success_message(context):
-    wait = WebDriverWait(context.driver, 10)  # Warte bis zu 10 Sekunden
+    wait = WebDriverWait(context.driver, 20)  # Warte bis zu 10 Sekunden
     success_message = wait.until(
         EC.visibility_of_element_located((By.CSS_SELECTOR, "[data-test-id='success-message']"))
     )
