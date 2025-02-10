@@ -27,18 +27,35 @@ def validateImage(file_path: str) -> bool:
     # Größe überprüfen (in MB)
     file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
     if file_size_mb > max_size_mb:
-        raise ValueError(f"Datei ist zu groß ({file_size_mb:.2f} MB), "
-                         f"maximal erlaubt sind {max_size_mb} MB.")
+        raise ValueError(
+            f"Datei ist zu groß ({file_size_mb:.2f} MB), "
+            f"maximal erlaubt sind {max_size_mb} MB."
+        )
 
     # Dateiformat prüfen
     _, extension = os.path.splitext(file_path)
     if extension.lower() not in valid_formats:
-        raise ValueError(f"Ungültiges Format '{extension}'. "
-                         f"Erlaubt sind: {valid_formats}.")
+        raise ValueError(
+            f"Ungueltiges Format '{extension}'. "
+            f"Erlaubt sind: {valid_formats}."
+        )
 
     # Wenn alle Checks bestanden sind, Rückgabe True
     return True
 
+
+# **Hier wird der Instagram-Client global initialisiert**
+cl = Client()
+try:
+    cl.load_settings('./info.json')
+    USERNAME = "farm_projekt_DHBW"
+    PASSWORD = "farmProjekt121224"
+    cl.login(USERNAME, PASSWORD)
+    print("Logged in successfully!")
+except Exception as e:
+    print(f"Login failed: {e}")
+
+# Flask-App erstellen
 app = Flask(__name__)
 CORS(app)
 
@@ -83,33 +100,36 @@ def upload_post():
         unique_filename = f"{uuid.uuid4()}_{file.filename}"
         media_path = os.path.join(app.config["UPLOAD_FOLDER"], unique_filename)
 
-        # Speichern der Datei im Upload-Ordner
+        # Speichern der Datei
         print(f"Saving file to: {media_path}")
         file.save(media_path)
 
-        # Validate die Datei im Upload-Ordner
+        # Prüfung der Bild-/Dateigültigkeit
         try:
             validateImage(media_path)
         except ValueError as ve:
-            # Löschen der Datei, falls ungültig
+            # Bei ungültigem Format oder überschrittener Größe -> 400
             if os.path.exists(media_path):
                 os.remove(media_path)
             return jsonify({"status": "error", "message": str(ve)}), 400
 
-        if scheduled_time:  # Schedule the post
-            # Save to the database
+        # Wenn scheduled_time gesetzt ist: Speichere in DB für späteren Upload (Beispiel)
+        if scheduled_time:
             with db_connection.cursor() as cursor:
                 cursor.execute(
-                "INSERT INTO scheduled_posts (post_type, caption, hashtags, media_path, scheduled_time) "
-                "VALUES (%s, %s, %s, %s, %s)",
-                (post_type, caption, hashtags, media_path, scheduled_time)  # Save only the unique filename
+                    """
+                    INSERT INTO scheduled_posts
+                        (post_type, caption, hashtags, media_path, scheduled_time)
+                    VALUES (%s, %s, %s, %s, %s)
+                    """,
+                    (post_type, caption, hashtags, media_path, scheduled_time)
                 )
                 db_connection.commit()
+
             return jsonify({"status": "success", "message": "Post scheduled successfully!"})
 
+        # Ansonsten direkt hochladen
         final_caption = f"{caption}\n\n{hashtags}"
-
-        # Upload based on post type
         if post_type == "image":
             cl.photo_upload(media_path, final_caption)
         elif post_type == "video":
@@ -121,27 +141,11 @@ def upload_post():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
     finally:
-        if not scheduled_time and os.path.exists(media_path):  # Delete file only if not scheduled
+        # Datei nur löschen, wenn sie direkt hochgeladen wurde
+        # (wenn es gescheduled ist, braucht die DB den Pfad!)
+        if not request.form.get("scheduled_time") and os.path.exists(media_path):
             os.remove(media_path)
 
-        # Cleanup additional unnecessary files with *.mp4.jpg
-        temp_thumbnail_path = media_path + ".jpg"
-        if os.path.exists(temp_thumbnail_path):
-            os.remove(temp_thumbnail_path)
-
-# Initialisiere den Instagram-Client nur, wenn die Datei direkt ausgeführt wird
+# Nur App starten, wenn Datei direkt ausgeführt wird
 if __name__ == "__main__":
-    cl = Client()
-    cl.load_settings('./info.json')
-    USERNAME = "farm_projekt_DHBW"
-    PASSWORD = "farmProjekt121224"
-    cl.get_timeline_feed()
-
-    try:
-        cl.login(USERNAME, PASSWORD)
-        print("Logged in successfully!")
-    except Exception as e:
-        print(f"Login failed: {e}")
-
-    # Starte Flask-App
     app.run(debug=True, port=5000)
